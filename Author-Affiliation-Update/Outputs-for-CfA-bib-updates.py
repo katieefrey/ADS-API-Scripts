@@ -155,35 +155,4 @@ with open('checkaffil.csv', 'rb') as f:
 
 metadata_updates.close()
 
-<<<<<<< HEAD
 print 'Finished creating output files - Yay!'
-=======
-#This creates and writes a file called "cfabib(timestamp).txt" that will list all bibcodes marked on checkaffil.csv
-
-filename = 'cfabib_updates'+timestamp+'.txt'
-cfabib_updates = open(filename, 'w')
-
-with open('checkaffil.csv', 'rb') as f:
-    reader = csv.reader(f)
-    print "\nbibcodes to add to CfA Bib"
-    for row in reader:
-        
-        if '%Rc' in row or '%R' in row:
-            try:
-                if 'x' in row[2]:
-                    row.pop(2)
-                    bib = (', ').join(row)
-                    bibcodes = bib.replace('%Rc,','').replace('%R,','')
-                    data=bibcodes.strip(", ")
-                    print data
-                    cfabib_updates.write(data+'\n') #writing bibcode
-            except IndexError:
-                pass
-
-cfabib_updates.close()
-
-if os.stat(filename)[6]==0:
-   print 'no bib codes to add'
-else:
-   print 'Finished creating output files - Yay!'
->>>>>>> cd9cd5452efe0b6ce14a8fa03d12a53760811a06
