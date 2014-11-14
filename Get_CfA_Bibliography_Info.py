@@ -6,7 +6,6 @@ import csv
 import time
 import codecs
 import cStringIO
-#from unidecode import unidecode
 from datetime import datetime
 
 #NOTE: typical ADS API users have a limit of 50,000 total results and 200 results per page.
@@ -47,17 +46,18 @@ resultFile = open("cfa_bibcodes"+timestamp+".csv",'wb')
 wr = UnicodeWriter(resultFile,dialect='excel',quoting=csv.QUOTE_ALL)
 
 #write header row
-wr.writerow(['Bibcode']+['PubDate']+['Title']+['Authors']+['Affiliations']+['Journal']+['Volume']+['Page']+['Citaions']+['URL'])
+wr.writerow(['Bibcode']+['PubDate']+['Title']+['Authors']+['Affiliations']+['Journal']+['Volume']+['Page']+['Citations']+['URL']+['Properties']+['Refereed?'])
 
 #how many times to loop
 loop = total/200
-print "Looping script "+str(loop)+" times."
+print "Looping script "+str(loop+2)+" times."
 startnum = 0
 
 #looping a lot!
 for i in range (1,loop+2):
     print "Results Page "+str(i)
     url = 'http://labs.adsabs.harvard.edu/adsabs/api/search/?q=bibgroup:cfa&start='+str(startnum)+'&rows=200&fmt=json&dev_key='+str(devkey)
+    print url
     content = requests.get(url)
     k=content.json()
     docs = k['results']['docs']
@@ -104,7 +104,18 @@ for i in range (1,loop+2):
             authorlist = (('; ').join(author))
         except KeyError:
             authorlist = ''
-    
+
+        try:
+            prop = x['property']
+            proplist = (('; ').join(prop))
+            if 'REFEREED' in prop:
+                refstat = 'Yes'
+            else:
+                refstat = 'No'
+        except KeyError:
+            proplist = ''
+            refstat = ''
+
         try:
             citation_count = x['citation_count']
         except KeyError:
@@ -115,7 +126,7 @@ for i in range (1,loop+2):
         except KeyError:
             year = ''                              
                 
-        row = [bibcode]+[pubdate]+[titleclean]+[authorlist]+[affillist]+[pub]+[volume]+[pageclean]+[str(citation_count)]+[absurl]
+        row = [bibcode]+[pubdate]+[titleclean]+[authorlist]+[affillist]+[pub]+[volume]+[pageclean]+[str(citation_count)]+[absurl]+[proplist]+[refstat]
         wr.writerow(row)
 
         
