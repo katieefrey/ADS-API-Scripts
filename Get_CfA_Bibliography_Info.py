@@ -46,7 +46,7 @@ resultFile = open("cfa_bibcodes"+timestamp+".csv",'wb')
 wr = UnicodeWriter(resultFile,dialect='excel',quoting=csv.QUOTE_ALL)
 
 #write header row
-wr.writerow(['Bibcode']+['PubDate']+['Title']+['Authors']+['Affiliations']+['Journal']+['Volume']+['Page']+['Citations']+['URL']+['Properties']+['Refereed?'])
+wr.writerow(['Bibcode']+['PubDate']+['Title']+['Journal']+['Volume']+['Page']+['Citations']+['URL']+['Properties']+['Refereed?'])
 
 #how many times to loop
 loop = total/200
@@ -65,13 +65,7 @@ for i in range (1,loop+2):
         bibcode = x['bibcode']
         print bibcode
         
-        absurl = "http://adsabs.harvard.edu/abs/"+bibcode
-        
-        try:
-            affil = x['aff']
-            affillist = (('; ').join(affil))
-        except KeyError:
-            affillist = ''        
+        absurl = "http://adsabs.harvard.edu/abs/"+bibcode      
                 
         try:
             title = x['title']
@@ -98,12 +92,6 @@ for i in range (1,loop+2):
             pageclean = "'"+('').join(page)
         except KeyError:
             pageclean = ''
-            
-        try:
-            author = x['author']
-            authorlist = (('; ').join(author))
-        except KeyError:
-            authorlist = ''
 
         try:
             prop = x['property']
@@ -126,7 +114,7 @@ for i in range (1,loop+2):
         except KeyError:
             year = ''                              
                 
-        row = [bibcode]+[pubdate]+[titleclean]+[authorlist]+[affillist]+[pub]+[volume]+[pageclean]+[str(citation_count)]+[absurl]+[proplist]+[refstat]
+        row = [bibcode]+[pubdate]+[titleclean]+[pub]+[volume]+[pageclean]+[str(citation_count)]+[absurl]+[proplist]+[refstat]
         wr.writerow(row)
 
         
