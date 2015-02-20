@@ -75,7 +75,10 @@ bibcode_lines = bibcodes.splitlines()
 resultFile = open("checkaffil.csv",'wb') #creates and writes (overwrites) this file
 wr = UnicodeWriter(resultFile,dialect='excel',quoting=csv.QUOTE_ALL)
 
+wr.writerow(['.'])
+
 for i in bibcode_lines:
+    print i
     url = 'http://adsabs.harvard.edu/abs/'+i+'&data_type=XML'    
     print url #printing url for troubleshooting
     

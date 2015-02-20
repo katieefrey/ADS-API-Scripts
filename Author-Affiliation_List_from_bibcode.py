@@ -40,38 +40,34 @@ bibcode_lines = bibcodes.splitlines()
 resultFile = open("paper_author"+timestamp+".csv",'wb')
 wr = UnicodeWriter(resultFile,dialect='excel',quoting=csv.QUOTE_ALL)
 
+wr.writerow(['bibcode','author','affiliation'])
+
 for i in bibcode_lines:
-    url = 'http://labs.adsabs.harvard.edu/adsabs/api/record/'+i+'?fmt=json&dev_key='+str(devkey)
+    url = 'http://adslabs.org/adsabs/api/record/'+i+'/?dev_key='+str(devkey)
     print url #printing url for troubleshooting
+  
     content = requests.get(url)
     k=content.json()    
 
-    authors = ''
     try:
         authors = k['author']
     except KeyError:
         print "bad author"
      
-    affil = ''   
     try:
         affil = k['aff']
     except KeyError:
         print "bad affil"
     
-
-    try:
-        n = len(authors)   
-        for x in range(0, n):
+    n = len(authors)
+    for x in range(0, n):
+        try:
             wr.writerow([i] + [authors[x]] + [affil[x]])
-    except IndexError:
-        n = len(authors)
-        for x in range(0,n):
+        except IndexError:
             wr.writerow([i] + [authors[x]])
 
     #wr.writerow([''])
     time.sleep(1)
     
 resultFile.close()
-print 'finished getting data, look at paperauthor.csv'
-
-
+print 'finished getting data, look at paper_author_(timestamp).csv'

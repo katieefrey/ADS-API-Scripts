@@ -43,7 +43,7 @@ bib1 = bib.splitlines()
 bib_lines = [x.strip() for x in bib1]
 
 for i in bib_lines:
-    url = 'http://labs.adsabs.harvard.edu/adsabs/api/record/'+i+'?fmt=json&dev_key='+str(devkey)
+    url = 'http://adslabs.org/adsabs/api/record/'+i+'/?dev_key='+str(devkey)
     
 #this section resets each variable to blank every time the script runs through the loop
     print url
