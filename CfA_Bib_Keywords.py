@@ -8,7 +8,20 @@ import csv
 import time
 import codecs
 import cStringIO
+import requests.packages.urllib3
 
+requests.packages.urllib3.disable_warnings()
+
+
+"""
+    url = 'https://api.adsabs.harvard.edu/v1/search/query/?q=bibcode:'+urllib.quote(i)+'&fl=bibcode,pubdate,aff,author,year,pub,title,abstract,keyword'
+    print url
+    
+    headers = {'Authorization': 'Bearer '+devkey}
+    content = requests.get(url, headers=headers)
+    results = content.json()
+    k = results['response']['docs'][0]
+"""
 
 #enter numerical value for your starting date (month and year)
 startYear = 2013
@@ -50,13 +63,16 @@ daterange = ' - '+str(startMonth)+' '+str(startYear)+' to '+str(endMonth)+' '+st
 text = codecs.open('keywords'+daterange+'.txt','w')
 for y in range(startYear,realendYear):
     for m in range(startMonth,realendMonth): # first number is starting month, last number needs to be one more than final month
-        url = 'http://labs.adsabs.harvard.edu/adsabs/api/search/?q=bibgroup:cfa,pubdate:'+str(y)+'-'+str(m)+'&rows=200&fl=keyword&fmt=json&dev_key='+str(devkey)
+        #url = 'http://labs.adsabs.harvard.edu/adsabs/api/search/?q=bibgroup:cfa,pubdate:'+str(y)+'-'+str(m)+'&rows=200&fl=keyword&fmt=json&dev_key='+str(devkey)
+        url = 'https://api.adsabs.harvard.edu/v1/search/query/?q=pubdate:'+str(y)+'-'+str(m)+'&rows=200&fl=bibcode,bibgroup:cfapubdate,aff,author,year,pub,title,abstract,keyword'
         print url
-        content = requests.get(url)
-        k=content.json()
-        #pprint.pprint(k)
-        docs = k['results']['docs']        
-        for i in docs:
+        
+        headers = {'Authorization': 'Bearer '+devkey}
+        content = requests.get(url, headers=headers)
+        results = content.json()
+        k = results['response']['docs']
+
+        for i in k:
             try:
                 mywords=i['keyword']
                 myList = list(set(mywords)) #magic line that removes exact duplicates from an articles keywords
