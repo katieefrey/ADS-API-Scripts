@@ -7,6 +7,9 @@ import time
 import codecs
 import cStringIO
 from datetime import datetime
+import requests.packages.urllib3
+
+requests.packages.urllib3.disable_warnings()
 
 #NOTE: typical ADS API users have a limit of 50,000 total results and 200 results per page.
 #As of Nov 12, 2014 this script is retrieving 44,451 results, so we're coming close to
@@ -32,11 +35,15 @@ class UnicodeWriter:
         for row in rows:
             self.writerow(row)
 
-url1 = 'http://labs.adsabs.harvard.edu/adsabs/api/search/?q=bibgroup:cfa&fmt=json&dev_key='+str(devkey)
-contentc = requests.get(url1)
-j=contentc.json()
+url = 'https://api.adsabs.harvard.edu/v1/search/query/?q=bibgroup:cfa'
+print url #printing url for troubleshooting
 
-total = j['meta']['hits']
+headers={'Authorization': 'Bearer '+devkey}
+content = requests.get(url, headers=headers)
+results=content.json()
+k = results['response']['docs'][0]
+
+total = results['response']['numFound']
 print "Total Results: "+str(total)
 
 timestamp = datetime.now().strftime("%Y_%m%d_%H%M")
@@ -54,14 +61,21 @@ print "Looping script "+str(loop+2)+" times."
 startnum = 0
 
 #looping a lot!
-for i in range (1,loop+2):
+#for i in range (1,loop+2):
+for i in range (1,3):
     print "Results Page "+str(i)
-    url = 'http://labs.adsabs.harvard.edu/adsabs/api/search/?q=bibgroup:cfa&start='+str(startnum)+'&rows=200&fmt=json&dev_key='+str(devkey)
+    url = 'https://api.adsabs.harvard.edu/v1/search/query/?q=bibgroup:cfa&start='+str(startnum)+'&rows=200&fl=bibcode,pubdate,aff,author,title,pub,volume,page,property,citation_count'
     print url
-    content = requests.get(url)
-    k=content.json()
-    docs = k['results']['docs']
+
+    headers = {'Authorization': 'Bearer '+devkey}
+    content = requests.get(url, headers=headers)
+    results = content.json()
+
+    docs = results['response']['docs']
+
     for x in docs:
+        print x
+
         bibcode = x['bibcode']
         print bibcode
         

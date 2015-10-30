@@ -6,8 +6,11 @@ import csv
 import time
 import codecs
 import cStringIO
+import urllib
 from datetime import datetime
+import requests.packages.urllib3
 
+requests.packages.urllib3.disable_warnings()
 
 #UnicodeWriter from http://docs.python.org/2/library/csv.html#examples
 class UnicodeWriter:
@@ -43,11 +46,13 @@ wr = UnicodeWriter(resultFile,dialect='excel',quoting=csv.QUOTE_ALL)
 wr.writerow(['bibcode','author','affiliation'])
 
 for i in bibcode_lines:
-    url = 'http://adslabs.org/adsabs/api/record/'+i+'/?dev_key='+str(devkey)
+    url = 'https://api.adsabs.harvard.edu/v1/search/query/?q=bibcode:'+urllib.quote(i)+'&fl=bibcode,pubdate,aff,author'
     print url #printing url for troubleshooting
   
-    content = requests.get(url)
-    k=content.json()    
+    headers={'Authorization': 'Bearer '+devkey}
+    content = requests.get(url, headers=headers)
+    results=content.json()
+    k = results['response']['docs'][0]
 
     try:
         authors = k['author']

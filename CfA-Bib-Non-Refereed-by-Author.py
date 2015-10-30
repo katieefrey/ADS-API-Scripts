@@ -4,7 +4,38 @@ import requests
 import json
 import csv
 import time
+import urllib
 from unidecode import unidecode
+import requests.packages.urllib3
+
+import sys
+reload(sys)
+sys.setdefaultencoding('utf-8')
+
+requests.packages.urllib3.disable_warnings()
+
+
+#UnicodeWriter from http://docs.python.org/2/library/csv.html#examples
+class UnicodeWriter:
+    def __init__(self, f, dialect=csv.excel, encoding="utf-8-sig", **kwds):
+        self.queue = cStringIO.StringIO()
+        self.writer = csv.writer(self.queue, dialect=dialect, **kwds)
+        self.stream = f
+        self.encoder = codecs.getincrementalencoder(encoding)()
+    def writerow(self, row):
+        self.writer.writerow([s.encode("utf-8") for s in row])
+        data = self.queue.getvalue()
+        data = data.decode("utf-8")
+        data = self.encoder.encode(data)
+        self.stream.write(data)
+        self.queue.truncate(0)
+
+    def writerows(self, rows):
+        for row in rows:
+            self.writerow(row)
+
+#/end UnicodeWriter
+
 
 devkey = (open('dev_key.txt','r')).read() #txt file that only has your dev key
 
@@ -13,15 +44,16 @@ authors_lines = authors.splitlines()
 out = open('articles_out.txt', 'w')
 
 for i in authors_lines:
-    for y in range(2010, 2011): #year range you wish to scrape, the ending number should be one more than your final year (i.e. range(2010,2014) will get info on years 2010, 2011, 2012, 2013)
-        for m in range(1,2): #first number is starting month, last number needs to be one more than final month
-            url = 'http://labs.adsabs.harvard.edu/adsabs/api/search/?q=bibgroup:cfa,author:"'+i+'",pubdate:'+str(y)+'-'+str(m)+'&filter=property:not_refereed&rows=200&fmt=json&dev_key='+str(devkey)
-            #above api request finds only CfA bibliography non-refereed papers.
-	    print url #printing url for troubleshooting
-            content = requests.get(url)
+    for y in range(2016, 2017): #year range you wish to scrape, the ending number should be one more than your final year (i.e. range(2010,2014) will get info on years 2010, 2011, 2012, 2013)
+        for m in range(01,02): #first number is starting month, last number needs to be one more than final month
+            url = 'https://api.adsabs.harvard.edu/v1/search/query/?q=author:"'+urllib.quote(i)+'"&fq=pubdate:'+str(y)+'-'+str(m)+'&fq=bibgroup:cfa&fq=property:not_refereed&rows=200&fl=title,bibcode,pubdate,aff,pub,database,author,year'
+        
+            print url
+            headers={'Authorization': 'Bearer '+devkey}
+            content = requests.get(url, headers=headers)
             k=content.json()
-            
-            docs = k['results']['docs']
+            docs = k['response']['docs']
+            print docs
             for x in docs:
                 bibcode=x['bibcode']
                 pubdate=x['pubdate']
@@ -51,7 +83,13 @@ for i in authors_lines:
                 
                 try:
                     author=x['author']
-                    authorlist = unidecode(('; ').join(author))
+                    print author
+                    print len(author)
+                    #[c.encode('utf-8') for c in author]
+                    #print author
+                    authorlist = u"; ".join(author)
+                    #print u''.join(author)
+                    #authorlist = unidecode(('; ').join(author))
                 except KeyError:
                     authorlist = ''
                 

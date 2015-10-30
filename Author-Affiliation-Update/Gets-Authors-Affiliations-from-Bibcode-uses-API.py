@@ -6,6 +6,13 @@ import csv
 import time
 import codecs
 import cStringIO
+import sys
+import urllib
+
+requests.packages.urllib3.disable_warnings()
+
+reload(sys)
+sys.setdefaultencoding("utf-8")
 
 #UnicodeWriter from http://docs.python.org/2/library/csv.html#examples
 class UnicodeWriter:
@@ -33,14 +40,19 @@ devkey = (open('dev_key.txt','r')).read() #txt file that only has your dev key
 bibcodes = open('bibcodes.txt').read() #one bbicode per line
 bibcode_lines = bibcodes.splitlines()
 
-resultFile = open("checkaffil.csv",'wb')
+resultFile = open("checkaffil-api.csv",'wb')
 wr = UnicodeWriter(resultFile,dialect='excel',quoting=csv.QUOTE_ALL)
 
+wr.writerow(['.'])
+
 for i in bibcode_lines:
-    url = 'http://labs.adsabs.harvard.edu/adsabs/api/record/'+i+'?fmt=json&dev_key='+str(devkey)
-    print url #printing url for troubleshooting
-    content = requests.get(url)
-    k=content.json()    
+    url = 'https://api.adsabs.harvard.edu/v1/search/query/?q=bibcode:'+urllib.quote(i)+'&fl=bibcode,pubdate,aff,author,year,pub,title,abstract,keyword'
+    print url
+    
+    headers = {'Authorization': 'Bearer '+devkey}
+    content = requests.get(url, headers=headers)
+    results = content.json()
+    k = results['response']['docs'][0]    
     
     wr.writerow(['%R']+[i]) #write the bibcode
     
@@ -57,8 +69,19 @@ for i in bibcode_lines:
         wr.writerow(['%A'])
     
     try:
-        affil = k['aff']   
-        wr.writerow(['%F']+affil)
+        afillist = []
+        affil = k['aff']
+        #print affil
+        for i in affil:
+            #print i
+            if i == "-":
+                afillist.append("")
+            else:
+                afillist.append(i)
+        #print ["lok"] + afillist
+        wr.writerow(['%F']+afillist)
+
+
     except KeyError:
         wr.writerow(['%F'])
     

@@ -6,8 +6,11 @@ import time
 import csv
 import codecs
 import cStringIO
+import urllib
 from datetime import datetime
-#from unidecode import unidecode
+import requests.packages.urllib3
+
+requests.packages.urllib3.disable_warnings()
 
 #UnicodeWriter from http://docs.python.org/2/library/csv.html#examples
 class UnicodeWriter:
@@ -43,13 +46,14 @@ bib1 = bib.splitlines()
 bib_lines = [x.strip() for x in bib1]
 
 for i in bib_lines:
-    url = 'http://adslabs.org/adsabs/api/record/'+i+'/?dev_key='+str(devkey)
-    
-#this section resets each variable to blank every time the script runs through the loop
+    url = 'https://api.adsabs.harvard.edu/v1/search/query/?q=bibcode:'+urllib.quote(i)+'&fl=bibcode,pubdate,aff,author,year,pub,title,abstract,keyword'
     print url
     
-    content = requests.get(url)
-    k=content.json()
+    headers = {'Authorization': 'Bearer '+devkey}
+    content = requests.get(url, headers=headers)
+    results = content.json()
+    k = results['response']['docs'][0]
+
     try:
         year = k['year']
     except KeyError:
