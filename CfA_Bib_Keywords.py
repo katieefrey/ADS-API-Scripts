@@ -71,7 +71,7 @@ for y in range(startYear,realendYear):
         content = requests.get(url, headers=headers)
         results = content.json()
         k = results['response']['docs']
-
+        print results
         for i in k:
             try:
                 mywords=i['keyword']
