@@ -61,8 +61,8 @@ print "Looping script "+str(loop+2)+" times."
 startnum = 0
 
 #looping a lot!
-#for i in range (1,loop+2):
-for i in range (1,3):
+for i in range (1,loop+2):
+#for i in range (1,3): #use this line instead of above for short testing
     print "Results Page "+str(i)
     url = 'https://api.adsabs.harvard.edu/v1/search/query/?q=bibgroup:cfa&start='+str(startnum)+'&rows=200&fl=bibcode,pubdate,aff,author,title,pub,volume,page,property,citation_count'
     print url
